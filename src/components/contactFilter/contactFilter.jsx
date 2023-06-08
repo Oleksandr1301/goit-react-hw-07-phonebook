@@ -1,25 +1,21 @@
-import { useDispatch, useSelector } from 'react-redux';
-import { setValueFilter } from 'redux/filterSlice';
-import { getValueFilter } from 'redux/selectors';
+import { useDispatch } from 'react-redux';
 import { FilterBox, FilterInput } from './contactFilter.styled';
+import { setFilter } from '../../redux/actions';
 
-export const ContactFilter = () => {
+const Filter = () => {
   const dispatch = useDispatch();
-  const filter = useSelector(getValueFilter);
 
-  const onFilter = e => {
-    dispatch(setValueFilter(e.target.value));
+  const onChange = e => {
+    const value = e.target.value.toLowerCase();
+    dispatch(setFilter(value));
   };
 
   return (
-    <FilterBox htmlFor="filter">
-      Find contacts by name
-      <FilterInput
-        type="text"
-        name="filter"
-        value={filter}
-        onChange={onFilter}
-      />
+    <FilterBox>
+      <label>Find contacts by name or phone number</label>
+      <FilterInput type="text" name="filter" onChange={onChange} />
     </FilterBox>
   );
 };
+
+export default Filter;

@@ -1,24 +1,29 @@
-import { PhoneForm } from './phoneForm/phoneForm';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 
-import { ContactFilter } from './contactFilter/contactFilter';
-import { ContactList } from './contactList/contactList';
-import { useSelector } from 'react-redux';
-import { getContacts } from 'redux/selectors';
+import PhoneForm from './phoneForm/phoneForm';
+import ContactList from './contactList/contactList';
+import { ContactsCounter } from 'components/contactsCounter';
+import Filter from './contactFilter/contactFilter';
+import { fetchContacts } from '../redux/contactSlice';
 
-export const App = () => {
-  const contacts = useSelector(getContacts);
+const App = () => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
 
   return (
     <div>
       <h1>Phonebook</h1>
+      <ContactsCounter />
       <PhoneForm />
-      {contacts.length > 0 && (
-        <div>
-          <h2>Contacts</h2>
-          <ContactFilter />
-          <ContactList />
-        </div>
-      )}
+      <h2>Contacts</h2>
+      <Filter />
+      <ContactList />
     </div>
   );
 };
+
+export default App;

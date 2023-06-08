@@ -1,27 +1,38 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { addContact } from '../../redux/contactSlice';
-import { getContacts } from 'redux/selectors';
+import { selectContacts } from '../../redux/selectors';
 import { FormField, Form, ButtonSubmit } from './phoneForm.styled';
 
-export const PhoneForm = () => {
+ const PhoneForm = () => {
+  const contacts = useSelector(selectContacts);
   const dispatch = useDispatch();
 
-  const contacts = useSelector(getContacts);
-
-  const handleSubmit = e => {
+  const handleAddContact = e => {
     e.preventDefault();
+
     const form = e.target;
-    const name = form.elements.name.value;
-    if (contacts.find(el => el.name === name)) {
-      alert(`${name} is alredy in contacts`);
-      return;
+    const name = e.target.name.value;
+    const phone = e.target.phone.value;
+    const nameOnTheList = contacts.some(
+      contact => contact.name.toLowerCase() === name.toLowerCase()
+    );
+
+    const newContact = {
+      name: name,
+      phone: phone,
+    };
+
+    if (!nameOnTheList) {
+      dispatch(addContact(newContact));
+      form.reset();
+    } else {
+      alert(`${name} is in use. Try another name.`);
     }
-    dispatch(addContact(name, form.elements.number.value));
-    form.reset();
   };
 
+
   return (
-    <Form action="submit" onSubmit={handleSubmit}>
+    <Form action="submit" onSubmit={handleAddContact}>
       <FormField htmlFor="name">
         Name
         <input
@@ -29,16 +40,16 @@ export const PhoneForm = () => {
           name="name"
           pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
           title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
-          className="lable"
+         className = 'lable'
           required
         />
       </FormField>
 
-      <FormField htmlFor="number">
+      <FormField htmlFor="phone">
         Number
         <input
           type="tel"
-          name="number"
+          name="phone"
           pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
           title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
           className="lable"
@@ -49,3 +60,5 @@ export const PhoneForm = () => {
     </Form>
   );
 };
+
+export default PhoneForm;

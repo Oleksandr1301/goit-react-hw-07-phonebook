@@ -1,28 +1,59 @@
-import { Contact } from '../contactItem/contactItem';
-import { useSelector } from 'react-redux';
-import { getContacts, getValueFilter } from 'redux/selectors';
+import { useSelector, useDispatch } from 'react-redux';
+import { List, Item, DelButton } from './contactList.styled';
+import {
+  selectStatusFilter,
+  selectContacts,
+  selectIsLoading,
+} from '../../redux/selectors';
 
-import { List } from './contactList.styled';
+import { deleteContact } from '../../redux/contactSlice';
 
-const getVisibleContacts = (contacts, filterValue) => {
-  if (!filterValue) {
-    return contacts;
-  }
-  return contacts.filter(contact =>
-    contact.name.toLowerCase().includes(filterValue)
+const ContactList = () => {
+  const contacts = useSelector(selectContacts);
+  const filter = useSelector(selectStatusFilter);
+  const isLoading = useSelector(selectIsLoading);
+  const dispatch = useDispatch();
+
+  const filteredContacts = contacts
+    .filter(contact => {
+      const nameMatch = contact.name
+        ? contact.name.toLowerCase().includes(filter.toLowerCase())
+        : false;
+      const phoneMatch = contact.phone
+        ? contact.phone.toLowerCase().includes(filter.toLowerCase())
+        : false;
+      return nameMatch || phoneMatch;
+    })
+    .sort((a, b) => {
+      if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+      if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+      return 0;
+    });
+
+  const handleDelete = idToDelete => {
+    dispatch(deleteContact(idToDelete));
+  };
+
+  return isLoading ? (
+    <p>List is Loading! Please wait.</p>
+  ) : filteredContacts.length > 0 ? (
+    <>
+      <List>
+        {filteredContacts.map(({ id, name, phone }) => {
+          return (
+            <Item key={id}>
+              {name}: {phone}
+              <DelButton type="submit" onClick={() => handleDelete(id)}>
+                Delete
+              </DelButton>
+            </Item>
+          );
+        })}
+      </List>
+    </>
+  ) : (
+    <p>No contacts.</p>
   );
 };
 
-export const ContactList = () => {
-  const contacts = useSelector(getContacts);
-  const filterValue = useSelector(getValueFilter);
-
-  const visibleContacts = getVisibleContacts(contacts, filterValue);
-  return (
-    <List>
-      {visibleContacts.map(contact => {
-        return <Contact key={contact.id} contact={contact} />;
-      })}
-    </List>
-  );
-};
+export default ContactList;
